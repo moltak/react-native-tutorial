@@ -13,26 +13,64 @@ var {
   View,
 } = React;
 
+var REQUEST_URL = 'https://raw.githubusercontent.com/facebook/react-native/master/docs/MoviesExample.json';
+
 var MOCKED_MOVIES_DATA = [
   {title: 'Title', year: '2015', posters: {thumbnail: 'http://i.imgur.com/UePbdph.jpg'}},
 ];
 
 var AwesomeProject = React.createClass({
+  getInitialState: function() {
+    return {
+      movies: null,
+    };
+  },
+  componentDidMount: function() {
+    this.fetchData();
+  },
+  fetchData: function() {
+    fetch(REQUEST_URL)
+      .then((response) => response.json())
+      .then((responseData) => {
+        this.setState({
+          movies: responseData.movies,
+        });
+      })
+      .done();
+  },
   render: function() {
-    var movie = MOCKED_MOVIES_DATA[0];
+    if (!this.state.movies) {
+      return this.renderLoadingView();
+    }
+
+    var movie = this.state.movies[0];
+    return this.renderMovie(movie);
+  },
+
+  renderLoadingView: function() {
     return (
       <View style={styles.container}>
-        <Image 
-          source={{uri: movie.posters.thumbnail}}
-          style={styles.thumbnail}/>
+        <Text>
+          Loading movies...
+        </Text>
+      </View>
+    );
+  },
 
+  renderMovie: function(movie) {
+    return (
+      <View style={styles.container}>
+        <Image
+          source={{uri: movie.posters.thumbnail}}
+          style={styles.thumbnail}
+        />
         <View style={styles.rightContainer}>
           <Text style={styles.title}>{movie.title}</Text>
           <Text style={styles.year}>{movie.year}</Text>
         </View>
       </View>
     );
-  }
+  },
 });
 
 var styles = StyleSheet.create({
